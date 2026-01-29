@@ -1,0 +1,18 @@
+
+{
+  "name": "魔法图书馆 Magic Library",
+  "short_name": "魔法图书馆",
+  "description": "智能绘本与桌游 AI 推荐系统",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3389/3389081.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

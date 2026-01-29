@@ -1,0 +1,5 @@
+{
+  "name": "Magic Library Recommender",
+  "description": "An intelligent book and board game recommendation app for children. Uses AI to match specific needs (age, theme, category) with a curated collection of educational and fun resources.",
+  "requestFramePermissions": []
+}
