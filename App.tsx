@@ -50,7 +50,7 @@ const App: React.FC = () => {
   // 初始化环境检查
   useEffect(() => {
     const checkKey = async () => {
-      const envKey = process.env.API_KEY;
+      const envKey = import.meta.env.VITE_API_KEY;
       const hasEnvKey = envKey && envKey !== "undefined" && envKey !== "null" && envKey !== "";
       if (!hasEnvKey && !customApiKey) setNeedsKeyConfig(true);
     };
