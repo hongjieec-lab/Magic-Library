@@ -1,24 +1,23 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { Resource, RecommendationResult } from "../types";
 
 export async function getRecommendations(query: string, currentDataset: Resource[]): Promise<RecommendationResult> {
-  const apiKey = process.env.API_KEY || localStorage.getItem('magic_library_api_key');
+  // 从 Vercel 环境变量读取，或者从 localStorage 读取用户手动输入的 Key
+  const apiKey = import.meta.env.VITE_API_KEY || localStorage.getItem('magic_library_api_key');
   
   if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey === "") {
     throw new Error("MISSING_API_KEY");
   }
-
+  
   const ai = new GoogleGenAI({ apiKey });
   
-  // 核心优化：脱水处理数据，突出标签（Tags）
   const optimizedIndex = currentDataset.map(item => ({ 
     id: item.id, 
     title: item.title, 
-    tags: item.categories, // AI 优先看这个
-    snippet: `${item.whyItsGood} | ${(item.description || '').substring(0, 100)}` // 辅助语义
+    tags: item.categories,
+    snippet: `${item.whyItsGood} | ${(item.description || '').substring(0, 100)}`
   }));
-
+  
   const systemInstruction = `
     你是一个儿童图书与桌游检索专家。
     任务：根据用户需求，从给定的数据列表中选出最相关的项（最多返回 40 个 ID）。
@@ -35,10 +34,10 @@ export async function getRecommendations(query: string, currentDataset: Resource
     数据库：
     ${JSON.stringify(optimizedIndex)}
   `;
-
+  
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview", // 切换为 Flash 模型以保证极速响应
+      model: "gemini-2.0-flash",
       contents: `用户正在寻找：${query}`,
       config: {
         systemInstruction,
@@ -53,7 +52,7 @@ export async function getRecommendations(query: string, currentDataset: Resource
         }
       },
     });
-
+    
     const text = response.text;
     if (!text) throw new Error("EMPTY_RESPONSE");
     
