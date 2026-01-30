@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Resource, Folder } from '../types';
 import ResourceCard from './ResourceCard';
@@ -13,10 +12,11 @@ interface Props {
   onUpdateFolders: (folders: Folder[]) => void;
   onToggleFavorite: (id: string) => void;
   onViewDetails: (resource: Resource) => void;
+  onExport?: () => void;
 }
 
 const FavoritesModal: React.FC<Props> = ({ 
-  isOpen, onClose, favorites, dataset, folders, isLoggedIn, onUpdateFolders, onToggleFavorite, onViewDetails 
+  isOpen, onClose, favorites, dataset, folders, isLoggedIn, onUpdateFolders, onToggleFavorite, onViewDetails, onExport 
 }) => {
   const [activeFolderId, setActiveFolderId] = useState<string>('all');
   const [showAddFolder, setShowAddFolder] = useState(false);
@@ -88,12 +88,22 @@ const FavoritesModal: React.FC<Props> = ({
                 分类整理您的心头好 ({favoriteItems.length})
               </p>
             </div>
-            <button 
-              onClick={onClose} 
-              className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all active:scale-90"
-            >
-              <i className="fa-solid fa-xmark text-lg"></i>
-            </button>
+            <div className="flex items-center gap-2">
+              {onExport && favoriteItems.length > 0 && (
+                <button 
+                  onClick={onExport} 
+                  className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 text-xs font-black hover:bg-indigo-100 transition-all active:scale-95 flex items-center gap-2"
+                >
+                  <i className="fa-solid fa-download"></i> 导出书单
+                </button>
+              )}
+              <button 
+                onClick={onClose} 
+                className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all active:scale-90"
+              >
+                <i className="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
