@@ -3,7 +3,9 @@ import { Resource, RecommendationResult } from "../types";
 
 export async function getRecommendations(query: string, currentDataset: Resource[]): Promise<RecommendationResult> {
   // 从 Vercel 环境变量读取，或者从 localStorage 读取用户手动输入的 Key
-console.log("AIzaSyC2co", apiKey ? apiKey.substring(0, 10) : "空");
+  const apiKey = import.meta.env.VITE_API_KEY || localStorage.getItem('magic_library_api_key');
+  
+  console.log("AIzaSyC2co", apiKey ? apiKey.substring(0, 10) : "空");
   
   if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey === "") {
     throw new Error("MISSING_API_KEY");
