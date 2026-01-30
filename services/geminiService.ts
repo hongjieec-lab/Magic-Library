@@ -39,7 +39,7 @@ export async function getRecommendations(query: string, currentDataset: Resource
   
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: `用户正在寻找：${query}`,
       config: {
         systemInstruction,
