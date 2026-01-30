@@ -213,7 +213,7 @@ const App: React.FC = () => {
           </div>
 
           <form onSubmit={handleSearch} className="relative group max-w-2xl">
-            <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="试试搜索"关于分享的绘本"..." className="w-full px-6 py-5 rounded-2xl bg-white text-gray-800 shadow-2xl focus:ring-4 focus:ring-yellow-400/50 outline-none pr-32 text-lg border-none" />
+            <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder='试试搜索"关于分享的绘本"...' className="w-full px-6 py-5 rounded-2xl bg-white text-gray-800 shadow-2xl focus:ring-4 focus:ring-yellow-400/50 outline-none pr-32 text-lg border-none" />
             <button type="submit" disabled={isSearching} className="absolute right-2 top-2 bottom-2 px-6 bg-yellow-400 hover:bg-yellow-500 text-indigo-900 font-black rounded-xl transition-all disabled:opacity-50 min-w-[120px] flex items-center justify-center gap-2">
               {isSearching ? <i className="fa-solid fa-circle-notch animate-spin"></i> : <i className="fa-solid fa-wand-magic-sparkles"></i>}
               {isSearching ? '检索中' : 'AI 寻找'}
