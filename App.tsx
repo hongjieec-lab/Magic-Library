@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { DATASET as MOCK_DATASET, APP_DATA_VERSION } from './constants';
 import { Resource, RecommendationResult, Folder, User } from './types';
@@ -39,7 +38,12 @@ const App: React.FC = () => {
     } catch { return MOCK_DATASET; }
   });
 
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('magic_library_favorites');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [folders, setFolders] = useState<Folder[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminPortal, setShowAdminPortal] = useState(false);
@@ -111,7 +115,49 @@ const App: React.FC = () => {
   }, [query, currentDataset, isSearching]);
 
   const toggleFavorite = (id: string) => {
-    setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
+    setFavorites(prev => {
+      const newFavorites = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
+      localStorage.setItem('magic_library_favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  };
+
+  const exportFavorites = () => {
+    const favoriteBooks = currentDataset.filter(item => favorites.includes(item.id));
+    if (favoriteBooks.length === 0) {
+      alert('收藏夹是空的！');
+      return;
+    }
+    
+    // 生成简洁的导出内容
+    const exportData = favoriteBooks.map(book => ({
+      title: book.title,
+      ageRange: book.ageRange,
+      categories: book.categories.join(', '),
+      description: book.description
+    }));
+    
+    // 创建文本内容
+    let content = '我的收藏书单\n';
+    content += '导出时间: ' + new Date().toLocaleString() + '\n';
+    content += '共 ' + favoriteBooks.length + ' 本\n';
+    content += '='.repeat(50) + '\n\n';
+    
+    exportData.forEach((book, index) => {
+      content += `${index + 1}. ${book.title}\n`;
+      content += `   适合年龄: ${book.ageRange}\n`;
+      content += `   分类: ${book.categories}\n`;
+      content += `   简介: ${book.description}\n\n`;
+    });
+    
+    // 下载文件
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '我的收藏书单.txt';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // --- 精准年龄解析匹配逻辑 (基于起始年龄 X) ---
@@ -153,7 +199,7 @@ const App: React.FC = () => {
       <DetailModal resource={selectedResource} isFavorite={selectedResource ? favorites.includes(selectedResource.id) : false} onToggleFavorite={toggleFavorite} onClose={() => setSelectedResource(null)} />
       <AdminPortal isOpen={showAdminPortal} onClose={() => setShowAdminPortal(false)} isAdmin={isAdmin} setIsAdmin={setIsAdmin} authorizedEmails={authorizedEmails} setAuthorizedEmails={setAuthorizedEmails} currentDataset={currentDataset} onUpdateDataset={(d) => { setCurrentDataset(d); localStorage.setItem('magic_library_custom_dataset', JSON.stringify(d)); }} onResetDataset={() => { localStorage.clear(); window.location.reload(); }} isCustomData={localStorage.getItem('magic_library_is_custom') === 'true'} />
       <UserPortal isOpen={showUserPortal} onClose={() => setShowUserPortal(false)} onLogin={setCurrentUser} currentUser={currentUser} onLogout={() => setCurrentUser(null)} />
-      <FavoritesModal isOpen={showFavoritesModal} onClose={() => setShowFavoritesModal(false)} favorites={favorites} dataset={currentDataset} folders={folders} isLoggedIn={!!currentUser} onUpdateFolders={setFolders} onToggleFavorite={toggleFavorite} onViewDetails={setSelectedResource} />
+      <FavoritesModal isOpen={showFavoritesModal} onClose={() => setShowFavoritesModal(false)} favorites={favorites} dataset={currentDataset} folders={folders} isLoggedIn={!!currentUser} onUpdateFolders={setFolders} onToggleFavorite={toggleFavorite} onViewDetails={setSelectedResource} onExport={exportFavorites} />
       <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} url={window.location.href} />
 
       <header className="relative bg-gradient-to-br from-indigo-900 via-indigo-600 to-purple-800 text-white pt-10 pb-24 px-6">
@@ -167,7 +213,7 @@ const App: React.FC = () => {
           </div>
 
           <form onSubmit={handleSearch} className="relative group max-w-2xl">
-            <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="试试搜索“关于分享的绘本”..." className="w-full px-6 py-5 rounded-2xl bg-white text-gray-800 shadow-2xl focus:ring-4 focus:ring-yellow-400/50 outline-none pr-32 text-lg border-none" />
+            <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="试试搜索"关于分享的绘本"..." className="w-full px-6 py-5 rounded-2xl bg-white text-gray-800 shadow-2xl focus:ring-4 focus:ring-yellow-400/50 outline-none pr-32 text-lg border-none" />
             <button type="submit" disabled={isSearching} className="absolute right-2 top-2 bottom-2 px-6 bg-yellow-400 hover:bg-yellow-500 text-indigo-900 font-black rounded-xl transition-all disabled:opacity-50 min-w-[120px] flex items-center justify-center gap-2">
               {isSearching ? <i className="fa-solid fa-circle-notch animate-spin"></i> : <i className="fa-solid fa-wand-magic-sparkles"></i>}
               {isSearching ? '检索中' : 'AI 寻找'}
